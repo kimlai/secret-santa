@@ -120,7 +120,7 @@
   <h2>Participants</h2>
   <form on:submit={addParticipant}>
     <label for="name">Nom</label>
-    <input bind:value={name} id="name" />
+    <input required bind:value={name} id="name" />
     <button>Ajouter</button>
   </form>
   <p>{participants.join(", ")}</p>
