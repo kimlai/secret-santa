@@ -1,9 +1,13 @@
 <script>
+  import { tick } from "svelte";
+
   let name = "";
   let participants = [];
   let exclusions = {};
   let solution = null;
   let showSolution = false;
+  let scrollToSolution = false;
+  let solutionElement;
 
   function addParticipant(e) {
     e.preventDefault();
@@ -29,12 +33,19 @@
     }
   }
 
-  function solve() {
+  async function onShowSolutionChange() {
+    await tick();
+    solutionElement.scrollIntoView({behavior: "smooth"});
+  }
+
+  async function solve() {
     solution = doSolve({
       pairs: participants.flatMap(p1 => shuffle(participants).map(p2 => [p1, p2])),
       exclusions,
       solution: []
     });
+    await tick();
+    solutionElement.scrollIntoView({behavior: "smooth"});
   }
 
   function doSolve(problem) {
@@ -151,44 +162,47 @@
     </ul>
     <button on:click={solve}>Lancer les calculs</button>
     {#if solution !== null}
-      <h2>Résultat</h2>
-      {#if solution === false}
-        <p>
-          Aucune solution n'a été trouvée. Vos règles sont probablement trop
-          restrictives.
-        </p>
-      {:else}
-        <p>
-          Partagez cette url avec les participants pour que chacun·e puisse
-          découvrir à qui il·elle offrira un cadeau cette année.
-        </p>
-        <input
-          class="result-url"
-          readonly
-          value={`https://santa.kimlaitrinh.me/resultat?data=${encodeURI(
-            btoa(JSON.stringify(solution))
-          )}`}
-        />
-        <section id="solution" class="flow">
-          <div>
-            <input
-              id="showSolution"
-              type="checkbox"
-              bind:checked={showSolution}
-            />
-            <label for="showSolution">Montrer la solution</label>
-          </div>
-          {#if showSolution}
-            <div class="solution">
-              {#each solution as [giver, receiver]}
-                <div>{giver}</div>
-                <div>➡️</div>
-                <div>{receiver}</div>
-              {/each}
+      <div bind:this={solutionElement}>
+        <h2>Résultat</h2>
+        {#if solution === false}
+          <p>
+            Aucune solution n'a été trouvée. Vos règles sont probablement trop
+            restrictives.
+          </p>
+        {:else}
+          <p>
+            Partagez cette url avec les participants pour que chacun·e puisse
+            découvrir à qui il·elle offrira un cadeau cette année.
+          </p>
+          <input
+            class="result-url"
+            readonly
+            value={`https://santa.kimlaitrinh.me/resultat?data=${encodeURI(
+              btoa(JSON.stringify(solution))
+            )}`}
+          />
+          <section id="solution" class="flow">
+            <div>
+              <input
+                id="showSolution"
+                type="checkbox"
+                bind:checked={showSolution}
+                on:change={onShowSolutionChange}
+              />
+              <label for="showSolution">Montrer la solution</label>
             </div>
-          {/if}
-        </section>
-      {/if}
+            {#if showSolution}
+              <div class="solution">
+                {#each solution as [giver, receiver]}
+                  <div>{giver}</div>
+                  <div>➡️</div>
+                  <div>{receiver}</div>
+                {/each}
+              </div>
+            {/if}
+          </section>
+        {/if}
+      </div>
     {/if}
   {/if}
 </main>
