@@ -111,7 +111,7 @@
   <p>
     Cette application vous aidera à déterminer qui offre un cadeau à qui dans un
     jeu de <em>Secret Santa</em>. Vous définissez les participants, puis ajoutez
-    des règles, par exemple on évite que les couples s'offrent des cadeaux entre
+    des règles. Par exemple on évite que les couples s'offrent des cadeaux entre
     eux, ou bien on peut définir que X ne doit pas tomber sur Y car c'était le
     résultat de l'année précédente.
   </p>
