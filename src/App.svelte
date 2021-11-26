@@ -8,6 +8,17 @@
   let showSolution = false;
   let scrollToSolution = false;
   let solutionElement;
+  let timeout;
+  let loadingMessage = null;
+
+  const worker = new Worker("/solver.js");
+  worker.onmessage = async function(e) {
+    clearTimeout(timeout);
+    solution = e.data;
+    loadingMessage = null;
+    await tick();
+    solutionElement.scrollIntoView({behavior: "smooth"});
+  }
 
   function addParticipant(e) {
     e.preventDefault();
@@ -39,66 +50,20 @@
   }
 
   async function solve() {
-    solution = doSolve({
-      pairs: participants.flatMap(p1 => shuffle(participants).map(p2 => [p1, p2])),
+    solution = null;
+    worker.postMessage({
+      pairs: participants.flatMap(
+        p1 => shuffle(participants).map(p2 => [p1, p2])
+      ),
       exclusions,
-      solution: []
+      solution: [],
+      participants
     });
-    await tick();
-    solutionElement.scrollIntoView({behavior: "smooth"});
-  }
-
-  function doSolve(problem) {
-    if (isInvalid(problem)) {
-      return false;
-    }
-    if(isDone(problem)) {
-      return problem.solution;
-    }
-    return exploreBranches(
-      problem.pairs,
-      problem
-    );
-  }
-
-  function isInvalid({solution, exclusions}) {
-    return solution.some(([giver, receiver]) => exclusions[giver].includes(receiver))
-      || givesMultipleTimes(solution)
-      || receivesMultipleTimes(solution);
-  }
-
-  function givesMultipleTimes(solution) {
-    const givers = solution.map(([giver, receiver]) => giver);
-    return givers.some((giver, i) => givers.slice(i + 1).includes(giver));
-  }
-
-  function receivesMultipleTimes(solution) {
-    const receivers = solution.map(([giver, receiver]) => receiver);
-    return receivers.some((receiver, i) => receivers.slice(i + 1).includes(receiver));
-  }
-
-  function isDone({solution}) {
-    return solution.length === participants.length;
-  }
-
-  function exploreBranches(pairs, problem) {
-    if (pairs.length === 0) {
-      return false;
-    }
-    const pair = pairs[0];
-    const result = doSolve(assign(problem, pair));
-    if (result === false) {
-      return exploreBranches(pairs.slice(1), problem);
-    } else {
-      return result;
-    }
-  }
-
-  function assign(problem, pair) {
-    const newProblem = {...problem};
-    const newSolution = problem.solution.concat([pair]);
-    newProblem.solution = newSolution;
-    return newProblem;
+    timeout = setTimeout(() => {
+      if (solution === null) {
+        loadingMessage = "Calcul en cours...";
+      }
+    }, 500);
   }
 
   // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
@@ -161,6 +126,9 @@
       {/each}
     </ul>
     <button on:click={solve}>Lancer les calculs</button>
+    {#if loadingMessage !== null}
+      <p>{loadingMessage}</p>
+    {/if}
     {#if solution !== null}
       <div bind:this={solutionElement}>
         <h2>Résultat</h2>
