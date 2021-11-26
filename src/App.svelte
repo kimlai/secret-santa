@@ -3,6 +3,7 @@
   let participants = [];
   let exclusions = {};
   let solution = null;
+  let showSolution = false;
 
   function addParticipant(e) {
     e.preventDefault();
@@ -157,35 +158,42 @@
           restrictives.
         </p>
       {:else}
-        <div class="solution">
-          {#each solution as [giver, receiver]}
-            <div>{giver}</div>
-            <div>➡️</div>
-            <div>{receiver}</div>
-          {/each}
-        </div>
+        <p>
+          Partagez cette url avec les participants pour que chacun·e puisse
+          découvrir à qui il·elle offrira un cadeau cette année.
+        </p>
+        <input
+          class="result-url"
+          readonly
+          value={`https://santa.kimlaitrinh.me/resultat?data=${encodeURI(
+            btoa(JSON.stringify(solution))
+          )}`}
+        />
+        <section id="solution" class="flow">
+          <div>
+            <input
+              id="showSolution"
+              type="checkbox"
+              bind:checked={showSolution}
+            />
+            <label for="showSolution">Montrer la solution</label>
+          </div>
+          {#if showSolution}
+            <div class="solution">
+              {#each solution as [giver, receiver]}
+                <div>{giver}</div>
+                <div>➡️</div>
+                <div>{receiver}</div>
+              {/each}
+            </div>
+          {/if}
+        </section>
       {/if}
     {/if}
   {/if}
 </main>
 
 <style>
-  main {
-    padding: 1em;
-    padding-bottom: 4rem;
-    max-width: 80ch;
-    margin: 0 auto;
-  }
-
-  h1 {
-    font-size: 4em;
-    line-height: 1.1;
-  }
-
-  * + h2 {
-    margin-top: 2rem;
-  }
-
   ul.rules {
     list-style: none;
     padding: 0;
@@ -205,7 +213,12 @@
     font-size: 1.2rem;
   }
 
+  #solution {
+    margin-top: 2rem;
+  }
+
   .solution {
+    margin-top: 1rem;
     display: grid;
     grid-template-columns: repeat(3, max-content);
     gap: 0.5rem;
@@ -213,5 +226,10 @@
 
   .solution > :nth-child(3n + 1) {
     text-align: right;
+  }
+
+  .result-url {
+    width: 50ch;
+    max-width: 100%;
   }
 </style>
