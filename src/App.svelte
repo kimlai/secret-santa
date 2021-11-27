@@ -1,9 +1,12 @@
 <script>
   import { tick } from "svelte";
+  import { set } from "idb-keyval";
+
+  export let savedState;
 
   let name = "";
-  let participants = [];
-  let exclusions = {};
+  let participants = savedState.participants || [];
+  let exclusions = savedState.exclusions || {};
   let solution = null;
   let showSolution = false;
   let solutionElement;
@@ -19,12 +22,31 @@
     solutionElement.scrollIntoView({behavior: "smooth"});
   }
 
+  function saveState() {
+    set("santa-state", { participants, exclusions });
+  }
+
   function addParticipant(e) {
     e.preventDefault();
     participants = [...participants, name];
     exclusions = Object.assign(exclusions, {[name]: [name]});
     name = "";
     solution = null;
+    saveState();
+  }
+
+  function removeParticipant(participant) {
+    return function() {
+      participants = participants.filter(p => p !== participant);
+      delete exclusions[participant];
+      const updatedExclusions = {};
+      for (name in exclusions) {
+        updatedExclusions[name] = exclusions[name].filter(p => p !== participant);
+      }
+      exclusions = updatedExclusions;
+      solution = null;
+      saveState();
+    }
   }
 
   function updateExclusion(giver, receiver) {
@@ -40,6 +62,7 @@
           {[giver]: [...exclusions[giver], receiver]}
         );
       }
+      saveState();
     }
   }
 
@@ -87,7 +110,14 @@
   <input required bind:value={name} id="name" />
   <button>Ajouter</button>
 </form>
-<p>{participants.join(", ")}</p>
+<ul class="participants">
+  {#each participants as participant}
+    <li>
+      <div>{participant}</div>
+      <button on:click={removeParticipant(participant)}>supprimer</button>
+    </li>
+  {/each}
+</ul>
 
 {#if participants.length > 1}
   <h2>Règles</h2>
@@ -163,12 +193,38 @@
 {/if}
 
 <style>
+  ul.participants,
   ul.rules {
     list-style: none;
     padding: 0;
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
+  }
+
+  .participants li {
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    background: #fafafa;
+    display: flex;
+  }
+
+  .participants li > :first-child {
+    padding: 0.25rem 0.5rem;
+  }
+
+  .participants li button {
+    background: none;
+    border: none;
+    border-left: 1px solid #ccc;
+    padding: 0.25rem 0.5rem;
+    margin: 0;
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+
+  .participants li button:hover {
+    text-decoration: underline;
   }
 
   .rules li {
