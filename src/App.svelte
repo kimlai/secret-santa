@@ -125,7 +125,10 @@
   {#each participants as participant}
     <li>
       <div>{participant}</div>
-      <button on:click={removeParticipant(participant)}>supprimer</button>
+      <button
+        aria-label={`retirer ${participant}`}
+        on:click={removeParticipant(participant)}>&times</button
+      >
     </li>
   {/each}
 </ul>
@@ -228,21 +231,18 @@
   .participants li {
     border: 1px solid #ccc;
     border-radius: 2px;
+    padding: 0.25rem 0.5rem;
     background: #fafafa;
     display: flex;
-  }
-
-  .participants li > :first-child {
-    padding: 0.25rem 0.5rem;
+    gap: 0.5rem;
   }
 
   .participants li button {
     background: none;
     border: none;
-    border-left: 1px solid #ccc;
-    padding: 0.25rem 0.5rem;
+    padding: 0;
     margin: 0;
-    font-size: 0.8rem;
+    font-size: 1.25rem;
     cursor: pointer;
   }
 
