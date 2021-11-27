@@ -111,10 +111,14 @@
   }
 </script>
 
-<h2>Participants</h2>
+<h2>Participant·es</h2>
+<p>Commencez par entrer les noms des participant·es</p>
 <form on:submit={addParticipant}>
-  <label for="name">Nom</label>
-  <input required bind:value={name} id="name" />
+  <input
+    aria-label="Entrez le nom d'un participant"
+    required
+    bind:value={name}
+  />
   <button>Ajouter</button>
 </form>
 <ul class="participants">
@@ -127,8 +131,13 @@
 </ul>
 
 <h2>Règles</h2>
+<p />
 {#if participants.length < 3}
-  <p>Vous devez ajouter au moins trois participants pour ajouter des règles.</p>
+  <p>
+    Les règles vous permettront de définir si le tirage doit éviter certaines
+    pairs. Vous devez ajouter au moins trois participants pour pouvoir ajouter
+    des règles.
+  </p>
 {:else}
   <ul class="rules">
     {#each participants as participant}
