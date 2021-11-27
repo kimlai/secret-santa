@@ -223,7 +223,8 @@
     cursor: pointer;
   }
 
-  .participants li button:hover {
+  .participants li button:hover,
+  .participants li button:focus {
     text-decoration: underline;
   }
 
