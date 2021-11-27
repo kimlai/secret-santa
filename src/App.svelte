@@ -81,97 +81,86 @@
   }
 </script>
 
-<main>
-  <h1>Secret Santa Planner</h1>
-  <p>
-    Cette application vous aidera à déterminer qui offre un cadeau à qui dans un
-    jeu de <em>Secret Santa</em>. Vous définissez les participants, puis ajoutez
-    des règles. Par exemple on évite que les couples s'offrent des cadeaux entre
-    eux, ou bien on peut définir que X ne doit pas tomber sur Y car c'était le
-    résultat de l'année précédente.
-  </p>
+<h2>Participants</h2>
+<form on:submit={addParticipant}>
+  <label for="name">Nom</label>
+  <input required bind:value={name} id="name" />
+  <button>Ajouter</button>
+</form>
+<p>{participants.join(", ")}</p>
 
-  <h2>Participants</h2>
-  <form on:submit={addParticipant}>
-    <label for="name">Nom</label>
-    <input required bind:value={name} id="name" />
-    <button>Ajouter</button>
-  </form>
-  <p>{participants.join(", ")}</p>
-
-  {#if participants.length > 1}
-    <h2>Règles</h2>
-    <ul class="rules">
-      {#each participants as participant}
-        <li class="flow">
-          <div>
-            <span class="can-give-to">{participant}</span> peut offrir à :
-          </div>
-          <div>
-            {#each participants.filter(p => p !== participant) as receiver}
-              <div>
-                <input
-                  id={`${participant}_${receiver}`}
-                  type="checkbox"
-                  checked={!exclusions[participant].includes(receiver)}
-                  on:change={updateExclusion(participant, receiver)}
-                />
-                <label for={`${participant}_${receiver}`}>{receiver}</label>
-              </div>
-            {/each}
-          </div>
-        </li>
-      {/each}
-    </ul>
-    <button on:click={solve}>Lancer les calculs</button>
-    {#if loadingMessage !== null}
-      <p>{loadingMessage}</p>
-    {/if}
-    {#if solution !== null}
-      <div bind:this={solutionElement}>
-        <h2>Résultat</h2>
-        {#if solution === false}
-          <p>
-            Aucune solution n'a été trouvée. Vos règles sont probablement trop
-            restrictives.
-          </p>
-        {:else}
-          <p>
-            Partagez cette url avec les participants pour que chacun·e puisse
-            découvrir à qui il·elle offrira un cadeau cette année.
-          </p>
-          <input
-            class="result-url"
-            readonly
-            value={`https://santa.kimlaitrinh.me/resultat?data=${encodeURI(
-              btoa(JSON.stringify(solution))
-            )}`}
-          />
-          <section id="solution" class="flow">
+{#if participants.length > 1}
+  <h2>Règles</h2>
+  <ul class="rules">
+    {#each participants as participant}
+      <li class="flow">
+        <div>
+          <span class="can-give-to">{participant}</span> peut offrir à :
+        </div>
+        <div>
+          {#each participants.filter(p => p !== participant) as receiver}
             <div>
               <input
-                id="showSolution"
+                id={`${participant}_${receiver}`}
                 type="checkbox"
-                bind:checked={showSolution}
-                on:change={onShowSolutionChange}
+                checked={!exclusions[participant].includes(receiver)}
+                on:change={updateExclusion(participant, receiver)}
               />
-              <label for="showSolution">Montrer la solution</label>
+              <label for={`${participant}_${receiver}`}>{receiver}</label>
             </div>
-            {#if showSolution}
-              <div class="solution">
-                {#each solution as [giver, receiver]}
-                  <div>{giver}</div>
-                  <div>➡️</div>
-                  <div>{receiver}</div>
-                {/each}
-              </div>
-            {/if}
-          </section>
-        {/if}
-      </div>
-    {/if}
+          {/each}
+        </div>
+      </li>
+    {/each}
+  </ul>
+  <button on:click={solve}>Lancer les calculs</button>
+  {#if loadingMessage !== null}
+    <p>{loadingMessage}</p>
   {/if}
-</main>
+  {#if solution !== null}
+    <div bind:this={solutionElement}>
+      <h2>Résultat</h2>
+      {#if solution === false}
+        <p>
+          Aucune solution n'a été trouvée. Vos règles sont probablement trop
+          restrictives.
+        </p>
+      {:else}
+        <p>
+          Partagez cette url avec les participants pour que chacun·e puisse
+          découvrir à qui il·elle offrira un cadeau cette année.
+        </p>
+        <input
+          class="result-url"
+          readonly
+          value={`https://santa.kimlaitrinh.me/resultat?data=${encodeURI(
+            btoa(JSON.stringify(solution))
+          )}`}
+        />
+        <section id="solution" class="flow">
+          <div>
+            <input
+              id="showSolution"
+              type="checkbox"
+              bind:checked={showSolution}
+              on:change={onShowSolutionChange}
+            />
+            <label for="showSolution">Montrer la solution</label>
+          </div>
+          {#if showSolution}
+            <div class="solution">
+              {#each solution as [giver, receiver]}
+                <div>{giver}</div>
+                <div>➡️</div>
+                <div>{receiver}</div>
+              {/each}
+            </div>
+          {/if}
+        </section>
+      {/if}
+    </div>
+  {/if}
+{/if}
 
 <style>
   ul.rules {
