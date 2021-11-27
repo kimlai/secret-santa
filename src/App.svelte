@@ -6,7 +6,6 @@
   let exclusions = {};
   let solution = null;
   let showSolution = false;
-  let scrollToSolution = false;
   let solutionElement;
   let timeout;
   let loadingMessage = null;
@@ -50,7 +49,6 @@
   }
 
   async function solve() {
-    solution = null;
     worker.postMessage({
       pairs: participants.flatMap(
         p1 => shuffle(participants).map(p2 => [p1, p2])
