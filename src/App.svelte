@@ -12,6 +12,7 @@
   let solutionElement;
   let timeout;
   let loadingMessage = null;
+  let solverErrorMessage = null;
 
   const worker = new Worker("/solver.js");
   worker.onmessage = async function(e) {
@@ -72,6 +73,12 @@
   }
 
   async function solve() {
+    if (participants.length < 2) {
+      solverErrorMessage =
+        "Vous devez ajouter au moins deux participants pour faire un tirage.";
+      return;
+    }
+    solverErrorMessage = null;
     worker.postMessage({
       pairs: participants.flatMap(
         p1 => shuffle(participants).map(p2 => [p1, p2])
@@ -119,8 +126,10 @@
   {/each}
 </ul>
 
-{#if participants.length > 1}
-  <h2>Règles</h2>
+<h2>Règles</h2>
+{#if participants.length < 3}
+  <p>Vous devez ajouter au moins trois participants pour ajouter des règles.</p>
+{:else}
   <ul class="rules">
     {#each participants as participant}
       <li class="flow">
@@ -143,53 +152,58 @@
       </li>
     {/each}
   </ul>
-  <button on:click={solve}>Lancer les calculs</button>
-  {#if loadingMessage !== null}
-    <p>{loadingMessage}</p>
+{/if}
+<h2>Tirage</h2>
+{#if solution === null}
+  <button on:click={solve}>Faire un tirage</button>
+  {#if solverErrorMessage}
+    <p>{solverErrorMessage}</p>
   {/if}
-  {#if solution !== null}
-    <div bind:this={solutionElement}>
-      <h2>Résultat</h2>
-      {#if solution === false}
-        <p>
-          Aucune solution n'a été trouvée. Vos règles sont probablement trop
-          restrictives.
-        </p>
-      {:else}
-        <p>
-          Partagez cette url avec les participants pour que chacun·e puisse
-          découvrir à qui il·elle offrira un cadeau cette année.
-        </p>
-        <input
-          class="result-url"
-          readonly
-          value={`https://santa.kimlaitrinh.me/resultat?data=${encodeURI(
-            btoa(JSON.stringify(solution))
-          )}`}
-        />
-        <section id="solution" class="flow">
-          <div>
-            <input
-              id="showSolution"
-              type="checkbox"
-              bind:checked={showSolution}
-              on:change={onShowSolutionChange}
-            />
-            <label for="showSolution">Montrer la solution</label>
+{:else}
+  <div bind:this={solutionElement}>
+    {#if solution === false}
+      <p>
+        Aucune solution n'a été trouvée. Vos règles sont probablement trop
+        restrictives.
+      </p>
+    {:else}
+      <p>
+        Partagez cette url avec les participants pour que chacun·e puisse
+        découvrir à qui il·elle offrira un cadeau cette année.
+      </p>
+      <input
+        class="result-url"
+        readonly
+        value={`https://santa.kimlaitrinh.me/resultat?data=${encodeURI(
+          btoa(JSON.stringify(solution))
+        )}`}
+      />
+      <section id="solution" class="flow">
+        <div>
+          <input
+            id="showSolution"
+            type="checkbox"
+            bind:checked={showSolution}
+            on:change={onShowSolutionChange}
+          />
+          <label for="showSolution">Montrer la solution</label>
+        </div>
+        {#if showSolution}
+          <div class="solution">
+            {#each solution as [giver, receiver]}
+              <div>{giver}</div>
+              <div>➡️</div>
+              <div>{receiver}</div>
+            {/each}
           </div>
-          {#if showSolution}
-            <div class="solution">
-              {#each solution as [giver, receiver]}
-                <div>{giver}</div>
-                <div>➡️</div>
-                <div>{receiver}</div>
-              {/each}
-            </div>
-          {/if}
-        </section>
-      {/if}
-    </div>
-  {/if}
+        {/if}
+      </section>
+    {/if}
+    <button class="mt-1" on:click={solve}>Faire un autre tirage</button>
+  </div>
+{/if}
+{#if loadingMessage !== null}
+  <p>{loadingMessage}</p>
 {/if}
 
 <style>
@@ -257,5 +271,9 @@
   .result-url {
     width: 50ch;
     max-width: 100%;
+  }
+
+  .mt-1 {
+    margin-top: 1rem;
   }
 </style>
