@@ -23,6 +23,7 @@
     loadingMessage = null;
     await tick();
     solutionElement.scrollIntoView({behavior: "smooth"});
+    solutionElement.focus();
   }
 
   function saveState() {
@@ -177,7 +178,7 @@
     <p>{solverErrorMessage}</p>
   {/if}
 {:else}
-  <div bind:this={solutionElement}>
+  <div tabindex="-1" bind:this={solutionElement}>
     {#if solution === false}
       <p>
         Aucune solution n'a été trouvée. Vos règles sont probablement trop
@@ -206,13 +207,15 @@
           <label for="showSolution">Montrer la solution</label>
         </div>
         {#if showSolution}
-          <div class="solution">
+          <table class="solution">
             {#each solution as [giver, receiver]}
-              <div>{giver}</div>
-              <div>➡️</div>
-              <div>{receiver}</div>
+              <tr>
+                <td>{giver}</td>
+                <td>➡️</td>
+                <td>{receiver}</td>
+              </tr>
             {/each}
-          </div>
+          </table>
         {/if}
       </section>
     {/if}
@@ -278,13 +281,14 @@
 
   .solution {
     margin-top: 1rem;
-    display: grid;
-    grid-template-columns: repeat(3, max-content);
-    gap: 0.5rem;
   }
 
-  .solution > :nth-child(3n + 1) {
+  .solution td:first-child {
     text-align: right;
+  }
+
+  .solution td:nth-child(2) {
+    padding: 0 0.5rem;
   }
 
   .result-url {
