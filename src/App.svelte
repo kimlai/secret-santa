@@ -14,6 +14,7 @@
   let loadingMessage = null;
   let solverErrorMessage = null;
   let ariaLiveMessage = null;
+  let participantsHeading = null;
 
   const worker = new Worker("/solver.js");
   worker.onmessage = async function(e) {
@@ -46,10 +47,11 @@
       for (name in exclusions) {
         updatedExclusions[name] = exclusions[name].filter(p => p !== participant);
       }
-      ariaLiveMessage = `${participant} a bien été retiré.`;
       exclusions = updatedExclusions;
       solution = null;
       saveState();
+      ariaLiveMessage = `${participant} a bien été retiré.`;
+      participantsHeading.focus();
     }
   }
 
@@ -114,7 +116,7 @@
   }
 </script>
 
-<h2>Participant·es</h2>
+<h2 bind:this={participantsHeading} tabindex="-1">Participant·es</h2>
 <p>Commencez par entrer les noms des participant·es</p>
 <form on:submit={addParticipant}>
   <input
