@@ -100,7 +100,7 @@
       if (running) {
         loadingMessage = "Calcul en cours...";
       }
-    }, 500);
+    }, 200);
   }
 
   // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
