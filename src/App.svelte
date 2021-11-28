@@ -13,6 +13,7 @@
   let timeout;
   let loadingMessage = null;
   let solverErrorMessage = null;
+  let ariaLiveMessage = null;
 
   const worker = new Worker("/solver.js");
   worker.onmessage = async function(e) {
@@ -31,6 +32,7 @@
     e.preventDefault();
     participants = [...participants, name];
     exclusions = Object.assign(exclusions, {[name]: [name]});
+    ariaLiveMessage = `${name} a bien été ajouté.`;
     name = "";
     solution = null;
     saveState();
@@ -44,6 +46,7 @@
       for (name in exclusions) {
         updatedExclusions[name] = exclusions[name].filter(p => p !== participant);
       }
+      ariaLiveMessage = `${participant} a bien été retiré.`;
       exclusions = updatedExclusions;
       solution = null;
       saveState();
@@ -167,7 +170,7 @@
 {/if}
 <h2>Tirage</h2>
 {#if solution === null}
-  <button on:click={solve}>Faire un tirage</button>
+  <button on:click={solve}>Lancer un tirage</button>
   {#if solverErrorMessage}
     <p>{solverErrorMessage}</p>
   {/if}
@@ -211,12 +214,17 @@
         {/if}
       </section>
     {/if}
-    <button class="mt-1" on:click={solve}>Faire un autre tirage</button>
+    <button class="mt-1" on:click={solve}>Lancer un autre tirage</button>
   </div>
 {/if}
 {#if loadingMessage !== null}
   <p>{loadingMessage}</p>
 {/if}
+<div role="status" aria-live="polite" class="visually-hidden">
+  {#if ariaLiveMessage !== null}
+    {ariaLiveMessage}
+  {/if}
+</div>
 
 <style>
   ul.participants,
