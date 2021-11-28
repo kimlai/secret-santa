@@ -10,6 +10,7 @@
   let solution = null;
   let showSolution = false;
   let solutionElement;
+  let running = false;
   let timeout;
   let loadingMessage = null;
   let solverErrorMessage = null;
@@ -20,6 +21,7 @@
   worker.onmessage = async function(e) {
     clearTimeout(timeout);
     solution = e.data;
+    running = false;
     loadingMessage = null;
     await tick();
     solutionElement.scrollIntoView({behavior: "smooth"});
@@ -93,8 +95,9 @@
       solution: [],
       participants
     });
+    running = true;
     timeout = setTimeout(() => {
-      if (solution === null) {
+      if (running) {
         loadingMessage = "Calcul en cours...";
       }
     }, 500);
@@ -223,7 +226,7 @@
   </div>
 {/if}
 {#if loadingMessage !== null}
-  <p>{loadingMessage}</p>
+  <p role="status" aria-live="polite">{loadingMessage}</p>
 {/if}
 <div role="status" aria-live="polite" class="visually-hidden">
   {#if ariaLiveMessage !== null}
