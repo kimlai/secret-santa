@@ -1,5 +1,6 @@
 <script>
   import { tick } from "svelte";
+  import { fly, fade } from "svelte/transition";
   import { set } from "idb-keyval";
 
   export let savedState;
@@ -16,6 +17,8 @@
   let solverErrorMessage = null;
   let ariaLiveMessage = null;
   let participantsHeading = null;
+  $: dataUrl = `https://santa.kimlaitrinh.me/resultat?data=${encodeURI(btoa(JSON.stringify(solution)))}`;
+  let copyIndicatorVisible = false;
 
   const worker = new Worker("/solver.js");
   worker.onmessage = async function(e) {
@@ -118,6 +121,13 @@
     }
     return array;
   }
+
+  function copyToClipboard() {
+    navigator.clipboard.writeText(dataUrl).then(() => {
+      copyIndicatorVisible = true;
+      ariaLiveMessage = "url copiée dans le presse-papier";
+    });
+  }
 </script>
 
 <h2 bind:this={participantsHeading} tabindex="-1">Participant·es</h2>
@@ -192,13 +202,22 @@
         Partagez cette url avec les participants pour que chacun·e puisse
         découvrir à qui il·elle offrira un cadeau cette année.
       </p>
-      <input
-        class="result-url"
-        readonly
-        value={`https://santa.kimlaitrinh.me/resultat?data=${encodeURI(
-          btoa(JSON.stringify(solution))
-        )}`}
-      />
+      <div class="data-url">
+        <input class="result-url" readonly value={dataUrl} />
+        <div class="copy-button">
+          <button on:click={copyToClipboard}>Copier</button>
+          {#if copyIndicatorVisible}
+            <div
+              class="copy-indicator"
+              in:fly={{ y: 25 }}
+              out:fade
+              on:introend={() => (copyIndicatorVisible = false)}
+            >
+              Copié !
+            </div>
+          {/if}
+        </div>
+      </div>
       <section id="solution" class="flow">
         <div>
           <input
@@ -301,5 +320,15 @@
 
   .mt-1 {
     margin-top: 1rem;
+  }
+
+  .copy-button {
+    position: relative;
+    display: inline-block;
+  }
+  .copy-indicator {
+    position: absolute;
+    top: -25px;
+    padding: 0 0.4em;
   }
 </style>
