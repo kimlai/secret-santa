@@ -54,6 +54,10 @@ input[type="checkbox"] + label {
   font-weight: normal;
 }
 
+input[type="text"] {
+  width: 100%;
+}
+
 input,
 button,
 select,

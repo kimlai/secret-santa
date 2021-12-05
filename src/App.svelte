@@ -128,14 +128,20 @@
       ariaLiveMessage = "url copiée dans le presse-papier";
     });
   }
+
+  function onDataUrlClick(e) {
+    e.target.select();
+  }
 </script>
 
 <h2 bind:this={participantsHeading} tabindex="-1">Participant·es</h2>
 <p>Commencez par entrer les noms des participant·es</p>
 <form on:submit={addParticipant}>
   <input
+    id="new-participant"
     aria-label="Entrez le nom d'un participant"
     required
+    type="text"
     bind:value={name}
   />
   <button>Ajouter</button>
@@ -203,7 +209,12 @@
         découvrir à qui il·elle offrira un cadeau cette année.
       </p>
       <div class="data-url">
-        <input class="result-url" readonly value={dataUrl} />
+        <input
+          class="result-url"
+          on:click={onDataUrlClick}
+          readonly
+          value={dataUrl}
+        />
         <div class="copy-button">
           <button on:click={copyToClipboard}>Copier</button>
           {#if copyIndicatorVisible}
@@ -213,7 +224,7 @@
               out:fade
               on:introend={() => (copyIndicatorVisible = false)}
             >
-              Copié !
+              Copié&nbsp;!
             </div>
           {/if}
         </div>
@@ -254,6 +265,10 @@
 </div>
 
 <style>
+  #new-participant {
+    max-width: 30ch;
+  }
+
   ul.participants,
   ul.rules {
     list-style: none;
@@ -313,19 +328,31 @@
     padding: 0 0.5rem;
   }
 
-  .result-url {
-    width: 50ch;
-    max-width: 100%;
-  }
-
   .mt-1 {
     margin-top: 1rem;
   }
 
+  .data-url {
+    display: grid;
+    grid-template-columns: 1fr auto;
+  }
+
   .copy-button {
     position: relative;
-    display: inline-block;
   }
+
+  .result-url {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    width: 100%;
+  }
+
+  .copy-button button {
+    margin-left: -1px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
   .copy-indicator {
     position: absolute;
     top: -25px;
