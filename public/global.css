@@ -109,3 +109,34 @@ button:focus {
 .flow > * + * {
   margin-top: 0.5rem;
 }
+
+.solution--regenerated {
+  animation: pinch 0.25s ease-in;
+}
+
+/* stolen from https://every-layout.dev/layouts/sidebar/ */
+@keyframes pinch {
+  0% {
+    transform: translateY(0.5rem);
+  }
+
+  25% {
+    transform: translateY(-0.5rem);
+  }
+
+  50% {
+    transform: translateY(0.25rem);
+  }
+
+  75% {
+    transform: translateY(-0.25rem);
+  }
+
+  87.5% {
+    transform: rotate(0.125rem);
+  }
+
+  to {
+    transform: rotate(0);
+  }
+}

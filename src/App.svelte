@@ -11,6 +11,7 @@
   let solution = null;
   let showSolution = false;
   let solutionElement;
+  let dataUrlElement;
   let running = false;
   let timeout;
   let loadingMessage = null;
@@ -27,8 +28,12 @@
     running = false;
     loadingMessage = null;
     await tick();
-    solutionElement.scrollIntoView({behavior: "smooth"});
     solutionElement.focus();
+    solutionElement.scrollIntoView({behavior: "smooth"});
+    dataUrlElement.classList.add("solution--regenerated");
+    setTimeout(() => {
+      dataUrlElement.classList.remove("solution--regenerated");
+    }, 500);
   }
 
   function saveState() {
@@ -208,7 +213,7 @@
         Partagez cette url avec les participants pour que chacun·e puisse
         découvrir à qui il·elle offrira un cadeau cette année.
       </p>
-      <div class="data-url">
+      <div bind:this={dataUrlElement} class="data-url">
         <input
           class="result-url"
           on:click={onDataUrlClick}
